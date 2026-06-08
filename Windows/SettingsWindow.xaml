@@ -1,0 +1,176 @@
+<Window x:Class="SamrtClass.Windows.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置" Height="560" Width="900">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <CheckBox Name="RunOnStartupChk" Content="开机自启动" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock Text="字体大小:" VerticalAlignment="Center" Margin="8,0,4,0"/>
+            <TextBox Name="FontSizeBox" Width="60" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <Button Name="ImportConfigBtn" Content="导入配置" Width="90" Margin="0,0,10,0"/>
+            <Button Name="ExportConfigBtn" Content="导出配置" Width="90" Margin="0,0,10,0"/>
+            <Button Name="SaveBtn" Content="保存" Width="100" Margin="0,0,10,0"/>
+            <Button Name="CloseBtn" Content="关闭" Width="100"/>
+        </StackPanel>
+
+        <TabControl Grid.Row="1" Margin="0,10,0,0">
+            <TabItem Header="学生">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <ListBox Name="StudentsList" Height="380" DisplayMemberPath="Name"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Name="AddStudentBtn" Content="添加学生" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="RemoveStudentBtn" Content="移除选中" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="学生详情" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="学号:" Width="80"/>
+                            <TextBox Name="StudentIdBox" IsReadOnly="True" Width="220"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="姓名:" Width="80"/>
+                            <TextBox Name="StudentNameBox" Width="220"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="社评值:" Width="80"/>
+                            <TextBox Name="StudentCreditsBox" Width="80"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button Name="ApplyStudentBtn" Content="应用更改" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="ResetStudentBtn" Content="重置" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="课程">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <ListBox Name="CoursesList" Height="380" DisplayMemberPath="Subject"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Name="AddCourseBtn" Content="添加课程" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="RemoveCourseBtn" Content="移除选中" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="课程详情" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="科目:" Width="80"/>
+                            <TextBox Name="CourseSubjectBox" Width="220"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="星期:" Width="80"/>
+                            <ComboBox Name="CourseDayBox" Width="120">
+                                <ComboBoxItem>周一</ComboBoxItem>
+                                <ComboBoxItem>周二</ComboBoxItem>
+                                <ComboBoxItem>周三</ComboBoxItem>
+                                <ComboBoxItem>周四</ComboBoxItem>
+                                <ComboBoxItem>周五</ComboBoxItem>
+                                <ComboBoxItem>周六</ComboBoxItem>
+                                <ComboBoxItem>周日</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="开始 (HH:mm):" Width="80"/>
+                            <TextBox Name="CourseStartBox" Width="120"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="结束 (HH:mm):" Width="80"/>
+                            <TextBox Name="CourseEndBox" Width="120"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button Name="ApplyCourseBtn" Content="应用更改" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="ResetCourseBtn" Content="重置" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="值日组">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <ListBox Name="DutyGroupsList" Height="380" DisplayMemberPath="Name"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Name="AddGroupBtn" Content="添加组" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="RemoveGroupBtn" Content="移除选中" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="值日组详情" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="组名:" Width="80"/>
+                            <TextBox Name="GroupNameBox" Width="220"/>
+                        </StackPanel>
+
+                        <TextBlock Text="组成员:" Margin="0,12,0,0"/>
+                        <ListBox Name="GroupMembersList" Height="150"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <ComboBox Name="AddMemberStudentBox" Width="160" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <TextBox Name="AddMemberRoleBox" Width="120" Margin="8,0,0,0"/>
+                            <Button Name="AddMemberBtn" Content="添加成员" Width="80" Margin="8,0,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Name="RemoveMemberBtn" Content="移除选中成员" Width="140"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button Name="ApplyGroupBtn" Content="应用更改" Width="100" Margin="0,0,10,0"/>
+                            <Button Name="ResetGroupBtn" Content="重置" Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="每日值日">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <Calendar Name="DutyCalendar"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <ComboBox Name="DutyGroupAssignBox" Width="200" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <Button Name="AssignDutyBtn" Content="指派" Width="80" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="已排值日" FontWeight="Bold"/>
+                        <ListBox Name="AssignedDutiesList" Height="320" DisplayMemberPath="Date"/>
+                        <Button Name="RemoveAssignedDutyBtn" Content="移除选中" Width="120" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>

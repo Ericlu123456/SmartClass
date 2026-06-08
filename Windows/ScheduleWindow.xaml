@@ -1,0 +1,28 @@
+<Window x:Class="SamrtClass.Windows.ScheduleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="今日课程与值日" Height="150" Width="600" WindowStyle="None" AllowsTransparency="True" Background="Transparent" Topmost="True" ShowInTaskbar="False">
+    <Border Background="#DDFFFFFF" CornerRadius="6" Padding="8">
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Width="350">
+                <TextBlock Text="今日课程" FontWeight="Bold"/>
+                <ListBox Name="CoursesList" Height="100">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Subject}" Width="180" FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+                                <TextBlock Text="{Binding StartTime}" Width="80" FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+                                <TextBlock Text="-" Width="10" FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+                                <TextBlock Text="{Binding EndTime}" Width="80" FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+            <StackPanel Width="200" Margin="10,0,0,0">
+                <TextBlock Text="今日值日" FontWeight="Bold"/>
+                <TextBlock Name="DutyText" Text="无" TextWrapping="Wrap"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
