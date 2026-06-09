@@ -1,6 +1,6 @@
 using System;
 
-namespace SamrtClass.Models
+namespace smartClass.Models
 {
     public class Course
     {

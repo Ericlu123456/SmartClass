@@ -1,4 +1,4 @@
-<Window x:Class="SamrtClass.Windows.AutoCloseDialog"
+<Window x:Class="smartClass.Windows.AutoCloseDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="询问" Height="150" Width="350" WindowStartupLocation="CenterScreen">

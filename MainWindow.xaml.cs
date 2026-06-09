@@ -5,11 +5,11 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using SamrtClass.Models;
-using SamrtClass.Services;
-using SamrtClass.Windows;
+using smartClass.Models;
+using smartClass.Services;
+using smartClass.Windows;
 
-namespace SamrtClass
+namespace smartClass
 {
     public partial class MainWindow : Window
     {
@@ -27,7 +27,6 @@ namespace SamrtClass
 
             SettingsBtn.Click += SettingsBtn_Click;
             ExitBtn.Click += ExitBtn_Click;
-            TestNotifyBtn.Click += TestNotifyBtn_Click;
         }
 
         // 在 App.OnStartup 中调用此方法以初始化但不显示主窗口
@@ -128,11 +127,6 @@ namespace SamrtClass
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
         {
             Close();
-        }
-
-        private void TestNotifyBtn_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.MessageBox.Show("提醒测试", "提醒", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void StartTimer()

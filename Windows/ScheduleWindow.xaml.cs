@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using SamrtClass.Models;
+using smartClass.Models;
 
-namespace SamrtClass.Windows
+namespace smartClass.Windows
 {
     public partial class ScheduleWindow : Window
     {

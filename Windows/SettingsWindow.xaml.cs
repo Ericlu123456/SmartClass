@@ -3,10 +3,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using SamrtClass.Models;
-using SamrtClass.Services;
+using smartClass.Models;
+using smartClass.Services;
 
-namespace SamrtClass.Windows
+namespace smartClass.Windows
 {
     public partial class SettingsWindow : Window
     {
@@ -17,6 +17,12 @@ namespace SamrtClass.Windows
             InitializeComponent();
             _state = StorageService.Load();
             RefreshLists();
+
+            // Navigation buttons
+            NavStudentsBtn.Click += NavStudentsBtn_Click;
+            NavCoursesBtn.Click += NavCoursesBtn_Click;
+            NavGroupsBtn.Click += NavGroupsBtn_Click;
+            NavDutyBtn.Click += NavDutyBtn_Click;
 
             AddStudentBtn.Click += AddStudentBtn_Click;
             RemoveStudentBtn.Click += RemoveStudentBtn_Click;
@@ -49,6 +55,71 @@ namespace SamrtClass.Windows
             CoursesList.SelectionChanged += CoursesList_SelectionChanged;
             DutyGroupsList.SelectionChanged += DutyGroupsList_SelectionChanged;
             DutyCalendar.SelectedDatesChanged += DutyCalendar_SelectedDatesChanged;
+
+            // Set initial selected button
+            NavStudentsBtn.Style = (Style)FindResource("NavButtonSelectedStyle");
+        }
+
+        private void NavStudentsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPage("Students");
+            UpdateNavigationButtonStyles(NavStudentsBtn);
+        }
+
+        private void NavCoursesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPage("Courses");
+            UpdateNavigationButtonStyles(NavCoursesBtn);
+        }
+
+        private void NavGroupsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPage("Groups");
+            UpdateNavigationButtonStyles(NavGroupsBtn);
+        }
+
+        private void NavDutyBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPage("Duty");
+            UpdateNavigationButtonStyles(NavDutyBtn);
+        }
+
+        private void ShowPage(string pageName)
+        {
+            // Hide all pages
+            StudentsPage.Visibility = Visibility.Collapsed;
+            CoursesPage.Visibility = Visibility.Collapsed;
+            GroupsPage.Visibility = Visibility.Collapsed;
+            DutyPage.Visibility = Visibility.Collapsed;
+
+            // Show selected page
+            switch (pageName)
+            {
+                case "Students":
+                    StudentsPage.Visibility = Visibility.Visible;
+                    break;
+                case "Courses":
+                    CoursesPage.Visibility = Visibility.Visible;
+                    break;
+                case "Groups":
+                    GroupsPage.Visibility = Visibility.Visible;
+                    break;
+                case "Duty":
+                    DutyPage.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
+
+        private void UpdateNavigationButtonStyles(System.Windows.Controls.Button selectedButton)
+        {
+            var navButtons = new[] { NavStudentsBtn, NavCoursesBtn, NavGroupsBtn, NavDutyBtn };
+            var normalStyle = (Style)FindResource("NavButtonStyle");
+            var selectedStyle = (Style)FindResource("NavButtonSelectedStyle");
+
+            foreach (var btn in navButtons)
+            {
+                btn.Style = btn == selectedButton ? selectedStyle : normalStyle;
+            }
         }
 
         private void RefreshLists()
@@ -131,7 +202,7 @@ namespace SamrtClass.Windows
 
         private void StudentsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (StudentsList.SelectedItem is SamrtClass.Models.Student s)
+            if (StudentsList.SelectedItem is smartClass.Models.Student s)
             {
                 StudentIdBox.Text = s.Id;
                 StudentNameBox.Text = s.Name;
@@ -147,7 +218,7 @@ namespace SamrtClass.Windows
 
         private void ApplyStudentBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (StudentsList.SelectedItem is SamrtClass.Models.Student s)
+            if (StudentsList.SelectedItem is smartClass.Models.Student s)
             {
                 s.Name = StudentNameBox.Text;
                 if (int.TryParse(StudentCreditsBox.Text, out var c)) s.SocialCredits = c;
@@ -157,7 +228,7 @@ namespace SamrtClass.Windows
 
         private void ResetStudentBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (StudentsList.SelectedItem is SamrtClass.Models.Student s)
+            if (StudentsList.SelectedItem is smartClass.Models.Student s)
             {
                 StudentNameBox.Text = s.Name;
                 StudentCreditsBox.Text = s.SocialCredits.ToString();
@@ -182,7 +253,7 @@ namespace SamrtClass.Windows
 
         private void CoursesList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (CoursesList.SelectedItem is SamrtClass.Models.Course c)
+            if (CoursesList.SelectedItem is smartClass.Models.Course c)
             {
                 CourseSubjectBox.Text = c.Subject;
                 CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == c.DayOfWeek);
@@ -199,7 +270,7 @@ namespace SamrtClass.Windows
 
         private void ApplyCourseBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CoursesList.SelectedItem is SamrtClass.Models.Course c)
+            if (CoursesList.SelectedItem is smartClass.Models.Course c)
             {
                 c.Subject = CourseSubjectBox.Text;
                 if (CourseDayBox.SelectedItem is ComboBoxItem it) c.DayOfWeek = (string)it.Content;
@@ -211,7 +282,7 @@ namespace SamrtClass.Windows
 
         private void ResetCourseBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CoursesList.SelectedItem is SamrtClass.Models.Course c)
+            if (CoursesList.SelectedItem is smartClass.Models.Course c)
             {
                 CourseSubjectBox.Text = c.Subject;
                 CourseStartBox.Text = c.StartTime;
@@ -238,7 +309,7 @@ namespace SamrtClass.Windows
 
         private void DutyGroupsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (DutyGroupsList.SelectedItem is SamrtClass.Models.DutyGroup g)
+            if (DutyGroupsList.SelectedItem is smartClass.Models.DutyGroup g)
             {
                 GroupNameBox.Text = g.Name;
                 GroupMembersList.ItemsSource = g.Members.Select(m => new { StudentName = _state.Students.FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "", m.Role, m.StudentId }).ToList();
@@ -252,12 +323,12 @@ namespace SamrtClass.Windows
 
         private void AddMemberBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!(DutyGroupsList.SelectedItem is SamrtClass.Models.DutyGroup g)) return;
+            if (!(DutyGroupsList.SelectedItem is smartClass.Models.DutyGroup g)) return;
             if (AddMemberStudentBox.SelectedItem == null) return;
 
             string sid = null;
             // 如果 SelectedItem 是 Student
-            if (AddMemberStudentBox.SelectedItem is SamrtClass.Models.Student s)
+            if (AddMemberStudentBox.SelectedItem is smartClass.Models.Student s)
             {
                 sid = s.Id;
             }
@@ -284,7 +355,7 @@ namespace SamrtClass.Windows
 
         private void RemoveMemberBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (DutyGroupsList.SelectedItem is SamrtClass.Models.DutyGroup g && GroupMembersList.SelectedItem != null)
+            if (DutyGroupsList.SelectedItem is smartClass.Models.DutyGroup g && GroupMembersList.SelectedItem != null)
             {
                 dynamic sel = GroupMembersList.SelectedItem;
                 string sid = sel.StudentId;
@@ -296,7 +367,7 @@ namespace SamrtClass.Windows
 
         private void ApplyGroupBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (DutyGroupsList.SelectedItem is SamrtClass.Models.DutyGroup g)
+            if (DutyGroupsList.SelectedItem is smartClass.Models.DutyGroup g)
             {
                 g.Name = GroupNameBox.Text;
                 RefreshLists();
@@ -305,7 +376,7 @@ namespace SamrtClass.Windows
 
         private void ResetGroupBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (DutyGroupsList.SelectedItem is SamrtClass.Models.DutyGroup g)
+            if (DutyGroupsList.SelectedItem is smartClass.Models.DutyGroup g)
             {
                 GroupNameBox.Text = g.Name;
                 GroupMembersList.ItemsSource = g.Members.Select(m => new { StudentName = _state.Students.FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "", m.Role, m.StudentId }).ToList();
@@ -372,7 +443,7 @@ namespace SamrtClass.Windows
                 using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", false))
                 {
                     if (key == null) return false;
-                    var val = key.GetValue("SamrtClass") as string;
+                    var val = key.GetValue("smartClass") as string;
                     return !string.IsNullOrEmpty(val);
                 }
             }
@@ -387,7 +458,7 @@ namespace SamrtClass.Windows
                 {
                     if (key == null) return;
                     var path = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-                    key.SetValue("SamrtClass", $"\"{path}\" --minimized");
+                    key.SetValue("smartClass", $"\"{path}\" --minimized");
                 }
             }
             catch { }
@@ -400,7 +471,7 @@ namespace SamrtClass.Windows
                 using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
                 {
                     if (key == null) return;
-                    key.DeleteValue("SamrtClass", false);
+                    key.DeleteValue("smartClass", false);
                 }
             }
             catch { }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SamrtClass.Models
+namespace smartClass.Models
 {
     public class DutyMember
     {

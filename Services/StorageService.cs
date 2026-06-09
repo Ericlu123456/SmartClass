@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using SamrtClass.Models;
+using smartClass.Models;
 
-namespace SamrtClass.Services
+namespace smartClass.Services
 {
     public static class StorageService
     {

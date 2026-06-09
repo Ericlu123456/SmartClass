@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Data;
 using System.Windows;
 
-namespace SamrtClass
+namespace smartClass
 {
     public partial class App : System.Windows.Application
     {

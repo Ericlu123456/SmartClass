@@ -2,7 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace SamrtClass.Windows
+namespace smartClass.Windows
 {
     public partial class AutoCloseDialog : Window
     {
