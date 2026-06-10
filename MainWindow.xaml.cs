@@ -74,8 +74,6 @@ namespace smartClass
             _notifyIcon.DoubleClick += (s, e) => ShowMainWindow();
 
             var menu = new ContextMenuStrip();
-            var openItem = new ToolStripMenuItem("打开");
-            openItem.Click += (s, e) => ShowMainWindow();
             var settingsItem = new ToolStripMenuItem("设置");
             settingsItem.Click += (s, e) => OpenSettings();
             var showSchedItem = new ToolStripMenuItem("显示/隐藏课程表");
@@ -85,7 +83,6 @@ namespace smartClass
             var exitItem = new ToolStripMenuItem("退出");
             exitItem.Click += (s, e) => Close();
 
-            menu.Items.Add(openItem);
             menu.Items.Add(settingsItem);
             menu.Items.Add(showSchedItem);
             menu.Items.Add(exportItem);
@@ -314,7 +311,7 @@ namespace smartClass
             });
         }
 
-        private void UpdateScheduleWindow()
+        public void UpdateScheduleWindow()
         {
             if (_scheduleWindow != null)
             {

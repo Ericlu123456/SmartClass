@@ -3,6 +3,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Windows.Threading;
+using System.Diagnostics;
 using smartClass.Models;
 using smartClass.Services;
 
@@ -11,6 +13,7 @@ namespace smartClass.Windows
     public partial class SettingsWindow : Window
     {
         private AppState _state;
+        private DispatcherTimer _shutdownTimer;
 
         public SettingsWindow()
         {
@@ -18,7 +21,12 @@ namespace smartClass.Windows
             _state = StorageService.Load();
             RefreshLists();
 
+            // 初始化自动关机定时器
+            _shutdownTimer = new DispatcherTimer();
+            _shutdownTimer.Tick += ShutdownTimer_Tick;
+
             // Navigation buttons
+            NavGeneralBtn.Click += NavGeneralBtn_Click;
             NavStudentsBtn.Click += NavStudentsBtn_Click;
             NavCoursesBtn.Click += NavCoursesBtn_Click;
             NavGroupsBtn.Click += NavGroupsBtn_Click;
@@ -42,13 +50,29 @@ namespace smartClass.Windows
             ResetGroupBtn.Click += ResetGroupBtn_Click;
             AssignDutyBtn.Click += AssignDutyBtn_Click;
             RemoveAssignedDutyBtn.Click += RemoveAssignedDutyBtn_Click;
-            SaveBtn.Click += SaveBtn_Click;
             CloseBtn.Click += CloseBtn_Click;
             // 字体设置
             FontSizeBox.Text = _state.FontSize.ToString();
 
-            // 初始化开机自启动状态
+            // 初始化常规设置控件
             RunOnStartupChk.IsChecked = IsRunOnStartup();
+            EnableShutdownChk.IsChecked = _state.EnableAutoShutdown;
+            AutoShutdownTimeBox.Text = _state.AutoShutdownTime;
+
+            // 当字体框失去焦点时自动保存字体设置
+            FontSizeBox.LostFocus += FontSizeBox_LostFocus;
+            // 回车也保存
+            FontSizeBox.KeyDown += FontSizeBox_KeyDown;
+
+            // 开机自启动变更即时生效
+            RunOnStartupChk.Checked += RunOnStartupChk_Changed;
+            RunOnStartupChk.Unchecked += RunOnStartupChk_Changed;
+
+            // 自动关机设置事件
+            EnableShutdownChk.Checked += EnableShutdownChk_Changed;
+            EnableShutdownChk.Unchecked += EnableShutdownChk_Changed;
+            AutoShutdownTimeBox.LostFocus += AutoShutdownTimeBox_LostFocus;
+            AutoShutdownTimeBox.KeyDown += AutoShutdownTimeBox_KeyDown;
 
             // 列表选择事件
             StudentsList.SelectionChanged += StudentsList_SelectionChanged;
@@ -56,8 +80,17 @@ namespace smartClass.Windows
             DutyGroupsList.SelectionChanged += DutyGroupsList_SelectionChanged;
             DutyCalendar.SelectedDatesChanged += DutyCalendar_SelectedDatesChanged;
 
-            // Set initial selected button
-            NavStudentsBtn.Style = (Style)FindResource("NavButtonSelectedStyle");
+            // Set initial selected button (常规)
+            NavGeneralBtn.Style = (Style)FindResource("NavButtonSelectedStyle");
+
+            // 启动自动关机定时器（若启用）
+            SetupShutdownTimer();
+        }
+
+        private void NavGeneralBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPage("General");
+            UpdateNavigationButtonStyles(NavGeneralBtn);
         }
 
         private void NavStudentsBtn_Click(object sender, RoutedEventArgs e)
@@ -87,6 +120,7 @@ namespace smartClass.Windows
         private void ShowPage(string pageName)
         {
             // Hide all pages
+            GeneralPage.Visibility = Visibility.Collapsed;
             StudentsPage.Visibility = Visibility.Collapsed;
             CoursesPage.Visibility = Visibility.Collapsed;
             GroupsPage.Visibility = Visibility.Collapsed;
@@ -95,6 +129,9 @@ namespace smartClass.Windows
             // Show selected page
             switch (pageName)
             {
+                case "General":
+                    GeneralPage.Visibility = Visibility.Visible;
+                    break;
                 case "Students":
                     StudentsPage.Visibility = Visibility.Visible;
                     break;
@@ -112,7 +149,7 @@ namespace smartClass.Windows
 
         private void UpdateNavigationButtonStyles(System.Windows.Controls.Button selectedButton)
         {
-            var navButtons = new[] { NavStudentsBtn, NavCoursesBtn, NavGroupsBtn, NavDutyBtn };
+            var navButtons = new[] { NavGeneralBtn, NavStudentsBtn, NavCoursesBtn, NavGroupsBtn, NavDutyBtn };
             var normalStyle = (Style)FindResource("NavButtonStyle");
             var selectedStyle = (Style)FindResource("NavButtonSelectedStyle");
 
@@ -141,6 +178,40 @@ namespace smartClass.Windows
 
             AddMemberStudentBox.ItemsSource = null;
             AddMemberStudentBox.ItemsSource = _state.Students;
+
+            // 如果当前选中项不为空，保持界面与数据同步
+            if (StudentsList.SelectedItem is Student selStu)
+            {
+                var s = _state.Students.FirstOrDefault(x => x.Id == selStu.Id);
+                if (s != null)
+                {
+                    StudentIdBox.Text = s.Id;
+                    StudentNameBox.Text = s.Name;
+                    StudentCreditsBox.Text = s.SocialCredits.ToString();
+                }
+            }
+
+            if (CoursesList.SelectedItem is Course selCourse)
+            {
+                var c = _state.Courses.FirstOrDefault(x => x.Id == selCourse.Id);
+                if (c != null)
+                {
+                    CourseSubjectBox.Text = c.Subject;
+                    CourseStartBox.Text = c.StartTime;
+                    CourseEndBox.Text = c.EndTime;
+                    CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == c.DayOfWeek);
+                }
+            }
+
+            if (DutyGroupsList.SelectedItem is DutyGroup selGroup)
+            {
+                var g = _state.DutyGroups.FirstOrDefault(x => x.Id == selGroup.Id);
+                if (g != null)
+                {
+                    GroupNameBox.Text = g.Name;
+                    GroupMembersList.ItemsSource = g.Members.Select(m => new { StudentName = _state.Students.FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "", m.Role, m.StudentId }).ToList();
+                }
+            }
         }
 
         private void ImportConfigBtn_Click(object sender, RoutedEventArgs e)
@@ -157,6 +228,7 @@ namespace smartClass.Windows
                     {
                         _state = state;
                         RefreshLists();
+                        AutoSave();
                     }
                 }
                 catch
@@ -189,6 +261,7 @@ namespace smartClass.Windows
             var name = "学生" + (_state.Students.Count + 1);
             _state.Students.Add(new Student { Id = id, Name = name });
             RefreshLists();
+            AutoSave();
         }
 
         private void RemoveStudentBtn_Click(object sender, RoutedEventArgs e)
@@ -197,6 +270,7 @@ namespace smartClass.Windows
             {
                 _state.Students.Remove(s);
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -223,6 +297,7 @@ namespace smartClass.Windows
                 s.Name = StudentNameBox.Text;
                 if (int.TryParse(StudentCreditsBox.Text, out var c)) s.SocialCredits = c;
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -240,6 +315,7 @@ namespace smartClass.Windows
             var id = Guid.NewGuid().ToString();
             _state.Courses.Add(new Course { Id = id, Subject = "科目" + (_state.Courses.Count + 1), DayOfWeek = "周一", StartTime = "08:00", EndTime = "08:45" });
             RefreshLists();
+            AutoSave();
         }
 
         private void RemoveCourseBtn_Click(object sender, RoutedEventArgs e)
@@ -248,6 +324,7 @@ namespace smartClass.Windows
             {
                 _state.Courses.Remove(c);
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -277,6 +354,7 @@ namespace smartClass.Windows
                 c.StartTime = CourseStartBox.Text;
                 c.EndTime = CourseEndBox.Text;
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -296,6 +374,7 @@ namespace smartClass.Windows
             var id = Guid.NewGuid().ToString();
             _state.DutyGroups.Add(new DutyGroup { Id = id, Name = "组" + (_state.DutyGroups.Count + 1) });
             RefreshLists();
+            AutoSave();
         }
 
         private void RemoveGroupBtn_Click(object sender, RoutedEventArgs e)
@@ -304,6 +383,7 @@ namespace smartClass.Windows
             {
                 _state.DutyGroups.Remove(g);
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -351,6 +431,7 @@ namespace smartClass.Windows
             var role = AddMemberRoleBox.Text ?? string.Empty;
             g.Members.Add(new DutyMember { StudentId = sid, Role = role });
             GroupMembersList.ItemsSource = g.Members.Select(m => new { StudentName = _state.Students.FirstOrDefault(st => st.Id == m.StudentId)?.Name ?? "", m.Role, m.StudentId }).ToList();
+            AutoSave();
         }
 
         private void RemoveMemberBtn_Click(object sender, RoutedEventArgs e)
@@ -362,6 +443,7 @@ namespace smartClass.Windows
                 var member = g.Members.FirstOrDefault(m => m.StudentId == sid);
                 if (member != null) g.Members.Remove(member);
                 GroupMembersList.ItemsSource = g.Members.Select(m => new { StudentName = _state.Students.FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "", m.Role, m.StudentId }).ToList();
+                AutoSave();
             }
         }
 
@@ -371,6 +453,7 @@ namespace smartClass.Windows
             {
                 g.Name = GroupNameBox.Text;
                 RefreshLists();
+                AutoSave();
             }
         }
 
@@ -383,17 +466,32 @@ namespace smartClass.Windows
             }
         }
 
-        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        private void FontSizeBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            // 保存字体设置
             if (double.TryParse(FontSizeBox.Text, out var fs))
             {
                 _state.FontSize = Math.Max(8, Math.Min(48, fs));
+                AutoSave();
+                // 通知主窗口更新显示
+                ((MainWindow)System.Windows.Application.Current.MainWindow)?.UpdateScheduleWindow();
             }
+        }
 
-            StorageService.Save(_state);
+        private void FontSizeBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (double.TryParse(FontSizeBox.Text, out var fs))
+                {
+                    _state.FontSize = Math.Max(8, Math.Min(48, fs));
+                    AutoSave();
+                    ((MainWindow)System.Windows.Application.Current.MainWindow)?.UpdateScheduleWindow();
+                }
+            }
+        }
 
-            // 处理开机自启动
+        private void RunOnStartupChk_Changed(object sender, RoutedEventArgs e)
+        {
             if (RunOnStartupChk.IsChecked == true)
             {
                 SetRunOnStartup();
@@ -402,8 +500,37 @@ namespace smartClass.Windows
             {
                 RemoveRunOnStartup();
             }
+            AutoSave();
+        }
 
-            System.Windows.MessageBox.Show("已保存", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+        private void EnableShutdownChk_Changed(object sender, RoutedEventArgs e)
+        {
+            _state.EnableAutoShutdown = EnableShutdownChk.IsChecked == true;
+            AutoSave();
+            SetupShutdownTimer();
+        }
+
+        private void AutoShutdownTimeBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (IsValidTime(AutoShutdownTimeBox.Text))
+            {
+                _state.AutoShutdownTime = AutoShutdownTimeBox.Text;
+                AutoSave();
+                SetupShutdownTimer();
+            }
+        }
+
+        private void AutoShutdownTimeBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (IsValidTime(AutoShutdownTimeBox.Text))
+                {
+                    _state.AutoShutdownTime = AutoShutdownTimeBox.Text;
+                    AutoSave();
+                    SetupShutdownTimer();
+                }
+            }
         }
 
         private void DutyCalendar_SelectedDatesChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -420,6 +547,7 @@ namespace smartClass.Windows
             var date = DutyCalendar.SelectedDate.Value.Date;
             _state.DailyDuties.Add(new DailyDuty { Date = date, DutyGroupId = gid });
             RefreshLists();
+            AutoSave();
         }
 
         private void RemoveAssignedDutyBtn_Click(object sender, RoutedEventArgs e)
@@ -428,12 +556,72 @@ namespace smartClass.Windows
             {
                 _state.DailyDuties.Remove(d);
                 RefreshLists();
+                AutoSave();
             }
         }
 
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void AutoSave()
+        {
+            // 统一保存当前状态并通知主窗口更新（如果存在）
+            try
+            {
+                StorageService.Save(_state);
+                // 通知主窗口更新 ScheduleWindow（使用 Dispatcher 确保在 UI 线程）
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+                {
+                    try
+                    {
+                        var main = System.Windows.Application.Current.MainWindow as MainWindow;
+                        main?.UpdateScheduleWindow();
+                    }
+                    catch { }
+                });
+            }
+            catch { }
+        }
+
+        private void SetupShutdownTimer()
+        {
+            try
+            {
+                _shutdownTimer.Stop();
+                if (!_state.EnableAutoShutdown) return;
+
+                if (!IsValidTime(_state.AutoShutdownTime)) return;
+
+                var parts = _state.AutoShutdownTime.Split(':');
+                int hh = int.Parse(parts[0]);
+                int mm = int.Parse(parts[1]);
+                var now = DateTime.Now;
+                var next = new DateTime(now.Year, now.Month, now.Day, hh, mm, 0);
+                if (next <= now) next = next.AddDays(1);
+                var span = next - now;
+                _shutdownTimer.Interval = span;
+                _shutdownTimer.Start();
+            }
+            catch { }
+        }
+
+        private void ShutdownTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                _shutdownTimer.Stop();
+                // 执行关机命令
+                var psi = new ProcessStartInfo("shutdown", "/s /t 0") { CreateNoWindow = true, UseShellExecute = false };
+                Process.Start(psi);
+            }
+            catch { }
+            finally
+            {
+                // 重新设置定时器为次日
+                SetupShutdownTimer();
+            }
         }
 
         private bool IsRunOnStartup()
@@ -448,6 +636,16 @@ namespace smartClass.Windows
                 }
             }
             catch { return false; }
+        }
+
+        private bool IsValidTime(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            var parts = text.Split(':');
+            if (parts.Length != 2) return false;
+            if (!int.TryParse(parts[0], out var hh)) return false;
+            if (!int.TryParse(parts[1], out var mm)) return false;
+            return hh >= 0 && hh < 24 && mm >= 0 && mm < 60;
         }
 
         private void SetRunOnStartup()
