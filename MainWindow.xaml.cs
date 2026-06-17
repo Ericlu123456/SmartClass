@@ -69,8 +69,18 @@ namespace smartClass
         {
             _notifyIcon = new NotifyIcon();
             _notifyIcon.Visible = true;
-            _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
-            _notifyIcon.Text = "智能教室系统";
+            /*
+             * v1.1
+             * 更改托盘图标：
+             * 使用程序自身的 exe 图标作为系统托盘图标（Assets/smartclass.ico）
+             */
+            _notifyIcon.Icon =
+                System.Drawing.Icon.ExtractAssociatedIcon(
+                    System.Diagnostics.Process
+                        .GetCurrentProcess()
+                        .MainModule!
+                        .FileName!);
+            _notifyIcon.Text = "SmartClass";
             _notifyIcon.DoubleClick += (s, e) => ShowMainWindow();
 
             var menu = new ContextMenuStrip();
@@ -80,14 +90,17 @@ namespace smartClass
             showSchedItem.Click += (s, e) => ToggleScheduleWindow();
             var exportItem = new ToolStripMenuItem("导出报表");
             exportItem.Click += (s, e) => ExportReports();
-            var exitItem = new ToolStripMenuItem("退出");
+            var exitItem = new ToolStripMenuItem("退出程序");
             exitItem.Click += (s, e) => Close();
+            var restartItem = new ToolStripMenuItem("重启程序");
+            restartItem.Click += (s, e) => RestartApplication();
 
             menu.Items.Add(settingsItem);
             menu.Items.Add(showSchedItem);
             menu.Items.Add(exportItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(exitItem);
+            menu.Items.Add(restartItem);
 
             _notifyIcon.ContextMenuStrip = menu;
         }
@@ -287,6 +300,39 @@ namespace smartClass
                 // 忽略
             }
         }
+        
+        /*
+         * v1.1
+         * 增加重启程序支持及托盘选项：
+         * 适应系统深浅模式
+         */
+        private void RestartApplication()
+        {
+            try
+            {
+                var exePath = System.Diagnostics.Process
+                        .GetCurrentProcess()
+                        .MainModule?
+                        .FileName;
+                
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    System.Diagnostics.Process.Start(exePath);
+                }
+
+                System.Windows.Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    "重启失败：\n" + ex.Message,
+                    "错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+
+        }
+
 
         private void ToggleScheduleWindow()
         {
