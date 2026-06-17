@@ -14,6 +14,7 @@ namespace smartClass.Windows
     {
         private AppState _state;
         private DispatcherTimer _shutdownTimer;
+        private Course _currentSelectedCourse; // 追踪当前选中的课程
 
         public SettingsWindow()
         {
@@ -35,7 +36,6 @@ namespace smartClass.Windows
             AddStudentBtn.Click += AddStudentBtn_Click;
             RemoveStudentBtn.Click += RemoveStudentBtn_Click;
             AddCourseBtn.Click += AddCourseBtn_Click;
-            RemoveCourseBtn.Click += RemoveCourseBtn_Click;
             ImportConfigBtn.Click += ImportConfigBtn_Click;
             ExportConfigBtn.Click += ExportConfigBtn_Click;
             AddGroupBtn.Click += AddGroupBtn_Click;
@@ -76,7 +76,6 @@ namespace smartClass.Windows
 
             // 列表选择事件
             StudentsList.SelectionChanged += StudentsList_SelectionChanged;
-            CoursesList.SelectionChanged += CoursesList_SelectionChanged;
             DutyGroupsList.SelectionChanged += DutyGroupsList_SelectionChanged;
             DutyCalendar.SelectedDatesChanged += DutyCalendar_SelectedDatesChanged;
 
@@ -164,8 +163,26 @@ namespace smartClass.Windows
             StudentsList.ItemsSource = null;
             StudentsList.ItemsSource = _state.Students;
 
-            CoursesList.ItemsSource = null;
-            CoursesList.ItemsSource = _state.Courses;
+            // 按天分组课程
+            var coursesByDay = new Dictionary<string, List<Course>>
+            {
+                { "周一", _state.Courses.Where(c => c.DayOfWeek == "周一").ToList() },
+                { "周二", _state.Courses.Where(c => c.DayOfWeek == "周二").ToList() },
+                { "周三", _state.Courses.Where(c => c.DayOfWeek == "周三").ToList() },
+                { "周四", _state.Courses.Where(c => c.DayOfWeek == "周四").ToList() },
+                { "周五", _state.Courses.Where(c => c.DayOfWeek == "周五").ToList() },
+                { "周六", _state.Courses.Where(c => c.DayOfWeek == "周六").ToList() },
+                { "周日", _state.Courses.Where(c => c.DayOfWeek == "周日").ToList() }
+            };
+
+            // 绑定到各个工作日的 ListBox
+            MondayList.ItemsSource = coursesByDay["周一"];
+            TuesdayList.ItemsSource = coursesByDay["周二"];
+            WednesdayList.ItemsSource = coursesByDay["周三"];
+            ThursdayList.ItemsSource = coursesByDay["周四"];
+            FridayList.ItemsSource = coursesByDay["周五"];
+            SaturdayList.ItemsSource = coursesByDay["周六"];
+            SundayList.ItemsSource = coursesByDay["周日"];
 
             DutyGroupsList.ItemsSource = null;
             DutyGroupsList.ItemsSource = _state.DutyGroups;
@@ -188,18 +205,6 @@ namespace smartClass.Windows
                     StudentIdBox.Text = s.Id;
                     StudentNameBox.Text = s.Name;
                     StudentCreditsBox.Text = s.SocialCredits.ToString();
-                }
-            }
-
-            if (CoursesList.SelectedItem is Course selCourse)
-            {
-                var c = _state.Courses.FirstOrDefault(x => x.Id == selCourse.Id);
-                if (c != null)
-                {
-                    CourseSubjectBox.Text = c.Subject;
-                    CourseStartBox.Text = c.StartTime;
-                    CourseEndBox.Text = c.EndTime;
-                    CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == c.DayOfWeek);
                 }
             }
 
@@ -320,7 +325,7 @@ namespace smartClass.Windows
 
         private void RemoveCourseBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CoursesList.SelectedItem is Course c)
+            if (sender is System.Windows.Controls.Button btn && btn.Tag is Course c)
             {
                 _state.Courses.Remove(c);
                 RefreshLists();
@@ -330,8 +335,9 @@ namespace smartClass.Windows
 
         private void CoursesList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (CoursesList.SelectedItem is smartClass.Models.Course c)
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is Course c)
             {
+                _currentSelectedCourse = c;
                 CourseSubjectBox.Text = c.Subject;
                 CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == c.DayOfWeek);
                 CourseStartBox.Text = c.StartTime;
@@ -339,20 +345,22 @@ namespace smartClass.Windows
             }
             else
             {
+                _currentSelectedCourse = null;
                 CourseSubjectBox.Text = string.Empty;
                 CourseStartBox.Text = string.Empty;
                 CourseEndBox.Text = string.Empty;
+                CourseDayBox.SelectedIndex = -1;
             }
         }
 
         private void ApplyCourseBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CoursesList.SelectedItem is smartClass.Models.Course c)
+            if (_currentSelectedCourse != null)
             {
-                c.Subject = CourseSubjectBox.Text;
-                if (CourseDayBox.SelectedItem is ComboBoxItem it) c.DayOfWeek = (string)it.Content;
-                c.StartTime = CourseStartBox.Text;
-                c.EndTime = CourseEndBox.Text;
+                _currentSelectedCourse.Subject = CourseSubjectBox.Text;
+                if (CourseDayBox.SelectedItem is ComboBoxItem it) _currentSelectedCourse.DayOfWeek = (string)it.Content;
+                _currentSelectedCourse.StartTime = CourseStartBox.Text;
+                _currentSelectedCourse.EndTime = CourseEndBox.Text;
                 RefreshLists();
                 AutoSave();
             }
@@ -360,12 +368,12 @@ namespace smartClass.Windows
 
         private void ResetCourseBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CoursesList.SelectedItem is smartClass.Models.Course c)
+            if (_currentSelectedCourse != null)
             {
-                CourseSubjectBox.Text = c.Subject;
-                CourseStartBox.Text = c.StartTime;
-                CourseEndBox.Text = c.EndTime;
-                CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == c.DayOfWeek);
+                CourseSubjectBox.Text = _currentSelectedCourse.Subject;
+                CourseStartBox.Text = _currentSelectedCourse.StartTime;
+                CourseEndBox.Text = _currentSelectedCourse.EndTime;
+                CourseDayBox.SelectedItem = CourseDayBox.Items.Cast<ComboBoxItem>().FirstOrDefault(it => (string)it.Content == _currentSelectedCourse.DayOfWeek);
             }
         }
 

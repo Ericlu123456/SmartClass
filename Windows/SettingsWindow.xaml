@@ -1,46 +1,56 @@
 <Window x:Class="smartClass.Windows.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:TitleBar.Height="36"
         Title="设置" Height="600" Width="1000">
     <Window.Resources>
-        <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#333333"/>
-            <Setter Property="Padding" Value="16,12"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Name="border">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                            Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#E8E8E8"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#D0D0D0"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="NavButtonSelectedStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-            <Setter Property="Background" Value="#0078D4"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="3,0,0,0"/>
-            <Setter Property="BorderBrush" Value="#0078D4"/>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources RequestedTheme="{x:Null}"/>
+                <ui:XamlControlsResources/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="NavButtonStyle" TargetType="Button">
+                <Setter Property="Padding" Value="16,12"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Name="border">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="NavButtonSelectedStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Grid>
@@ -50,7 +60,7 @@
         </Grid.RowDefinitions>
 
         <!-- Top Bar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Background="#F3F3F3" Margin="10">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Name="ImportConfigBtn" Content="导入配置" Width="90" Margin="0,0,10,0"/>
             <Button Name="ExportConfigBtn" Content="导出配置" Width="90" Margin="0,0,10,0"/>
             <Button Name="CloseBtn" Content="关闭" Width="100"/>
@@ -64,7 +74,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Vertical Navigation Pane -->
-            <Border Grid.Column="0" Background="#F6F6F6" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+            <Border Grid.Column="0" BorderThickness="0,0,1,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Name="NavigationPane">
                         <Button Name="NavGeneralBtn" Content="⚙ 常规" Style="{StaticResource NavButtonStyle}" Click="NavGeneralBtn_Click"/>
@@ -153,27 +163,201 @@
                     <!-- Courses Page -->
                     <Grid Name="CoursesPage" Visibility="Collapsed" Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="350"/>
                         </Grid.ColumnDefinitions>
 
+                        <!-- Left: Weekly Course View -->
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="课程列表" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
-                            <ListBox Name="CoursesList" Height="300" DisplayMemberPath="Subject"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                <Button Name="AddCourseBtn" Content="添加课程" Width="100" Margin="0,0,10,0"/>
-                                <Button Name="RemoveCourseBtn" Content="移除选中" Width="100"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="课程表" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                <Button Name="AddCourseBtn" Content="+ 添加课程" Margin="10,0,0,0" Padding="8,4" Width="120"/>
                             </StackPanel>
+
+                            <!-- Scrollable tab control for each day -->
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="400">
+                                <StackPanel Name="CoursesSchedulePanel">
+                                    <!-- Day 1: 周一 -->
+                                    <Expander Header="📍 周一" IsExpanded="True" Margin="0,0,0,8">
+                                        <ListBox Name="MondayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Name="RemoveCourseBtn" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 2: 周二 -->
+                                    <Expander Header="📍 周二" Margin="0,0,0,8">
+                                        <ListBox Name="TuesdayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 3: 周三 -->
+                                    <Expander Header="📍 周三" Margin="0,0,0,8">
+                                        <ListBox Name="WednesdayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 4: 周四 -->
+                                    <Expander Header="📍 周四" Margin="0,0,0,8">
+                                        <ListBox Name="ThursdayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 5: 周五 -->
+                                    <Expander Header="📍 周五" Margin="0,0,0,8">
+                                        <ListBox Name="FridayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 6: 周六 -->
+                                    <Expander Header="📍 周六" Margin="0,0,0,8">
+                                        <ListBox Name="SaturdayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+
+                                    <!-- Day 7: 周日 -->
+                                    <Expander Header="📍 周日" Margin="0,0,0,8">
+                                        <ListBox Name="SundayList" Height="120" SelectionChanged="CoursesList_SelectionChanged" Margin="0,8,0,0">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="8" CornerRadius="4" Margin="0,2">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Subject}" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding StartTime, StringFormat=开始时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                                <TextBlock Text="{Binding EndTime, StringFormat=结束时间: {0}}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="×" Width="24" Height="24" Padding="0" VerticalAlignment="Top" Click="RemoveCourseBtn_Click" Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Expander>
+                                </StackPanel>
+                            </ScrollViewer>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <!-- Right: Course Details Edit Panel -->
+                        <StackPanel Grid.Column="1" Margin="15,0,0,0">
                             <TextBlock Text="课程详情" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                            <TextBlock Text="(选择课程进行编辑)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,15"/>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="科目:" Width="80"/>
-                                <TextBox Name="CourseSubjectBox" Width="220"/>
+                                <TextBlock Text="科目:" Width="60" VerticalAlignment="Center"/>
+                                <TextBox Name="CourseSubjectBox" Width="250"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="星期:" Width="80"/>
+                                <TextBlock Text="星期:" Width="60" VerticalAlignment="Center"/>
                                 <ComboBox Name="CourseDayBox" Width="120">
                                     <ComboBoxItem>周一</ComboBoxItem>
                                     <ComboBoxItem>周二</ComboBoxItem>
@@ -185,11 +369,11 @@
                                 </ComboBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="开始 (HH:mm):" Width="80"/>
+                                <TextBlock Text="开始:" Width="60" VerticalAlignment="Center"/>
                                 <TextBox Name="CourseStartBox" Width="120"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="结束 (HH:mm):" Width="80"/>
+                                <TextBlock Text="结束:" Width="60" VerticalAlignment="Center"/>
                                 <TextBox Name="CourseEndBox" Width="120"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,16,0,0">

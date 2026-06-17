@@ -99,8 +99,8 @@ namespace smartClass
             menu.Items.Add(showSchedItem);
             menu.Items.Add(exportItem);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(exitItem);
             menu.Items.Add(restartItem);
+            menu.Items.Add(exitItem);
 
             _notifyIcon.ContextMenuStrip = menu;
         }

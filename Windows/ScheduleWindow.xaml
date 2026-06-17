@@ -19,11 +19,13 @@
 
     <StackPanel Orientation="Horizontal">
 
-        <StackPanel Width="350">
+        <StackPanel MinWidth="300">
             <TextBlock Text="今日课程"
                        FontWeight="Bold"/>
 
-            <ListBox Name="CoursesList">
+                <ListBox Name="CoursesList"  MinWidth="200"
+                    BorderThickness="0"
+                    Background="Transparent">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -48,7 +50,7 @@
             </ListBox>
         </StackPanel>
 
-        <StackPanel Width="280" Margin="10,0,0,0">
+        <StackPanel MinWidth="300" Margin="10,0,0,0">
             <TextBlock Text="今日值日"
                        FontWeight="Bold"/>
 
@@ -61,16 +63,20 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Name}"
-                                       Width="140"/>
+                                       Width="140"
+                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
 
                             <TextBlock Text=" ("
-                                       Foreground="#666"/>
+                                       Foreground="#666"
+                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
 
                             <TextBlock Text="{Binding Role}"
-                                       Foreground="#666"/>
+                                       Foreground="#666"
+                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
 
                             <TextBlock Text=")"
-                                       Foreground="#666"/>
+                                       Foreground="#666"
+                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
