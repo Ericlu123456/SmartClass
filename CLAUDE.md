@@ -22,14 +22,18 @@ No test project exists — there is no test runner to invoke.
 
 ## Architecture
 
-This is a **.NET 8 WPF + WinForms system-tray application** for classroom management (下课提醒, 值日表, 值日提醒). The app starts hidden to the tray — `MainWindow` is never shown on launch, only the tray icon and an optional floating overlay (`ScheduleWindow`).
+This is a **.NET 8 WPF + WinForms top-bar application** for classroom management (下课提醒, 值日表, 值日提醒). `MainWindow` is a frameless, topmost, full-width top bar (70px) positioned at the top of the screen — three-column layout: date/countdown/buttons (left), clock (center), today's courses/duty (right). A tray icon provides balloon notifications and context menu.
 
 ### Startup flow
 
-1. `App.OnStartup` → `SingleInstanceManager` (named `Global\SmartClass_SingleInstance_{MachineName}` mutex) → creates `MainWindow` → calls `InitializeHiddenMode()` (never `Show()`).
-2. `MainWindow.InitializeHiddenMode()`: loads `AppState` via `StorageService`, sets up tray icon, starts a `DispatcherTimer` (30s interval), checks yesterday's duties, opens `ScheduleWindow`.
+1. `App.OnStartup` → `SingleInstanceManager` (named `Global\SmartClass_SingleInstance_{MachineName}` mutex) → creates `MainWindow` → calls `InitializeTopBar()` → `Show()`.
+2. `MainWindow.InitializeTopBar()`: loads `AppState`, positions window at screen top, sets up tray icon, starts business timer (60s) + UI refresh timer (1s), checks yesterday's duties, opens `ScheduleWindow`.
 
-### Core loop (`MainWindow` timer, every 30s)
+### Core loop
+
+- **Business timer (60s)**: For each `Course` matching today's weekday: fire `AskBoardCleaned` on start time (modal `AutoCloseDialog` — 10min timeout, social credits +1/-1), `NotifyAfterClass` on end time (balloon tip + speech). At 17:30: `NotifyDutyAtEndOfDay`.
+- **UI refresh timer (1s)**: Updates date label, clock (`HH:mm:ss`), semester countdown, next course labels, today's duty group names.
+- On startup: `CheckYesterdayDuties` (MessageBox Yes/No → +5/-5 social credits).
 
 - For each `Course` matching today's weekday: fire `AskBoardCleaned` on start time (modal `AutoCloseDialog` — 10min timeout, social credits +1/-1), and `NotifyAfterClass` on end time (balloon tip).
 - At 17:30: `NotifyDutyAtEndOfDay` (balloon tip with duty group members).

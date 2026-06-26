@@ -1,36 +1,89 @@
-﻿<Window x:Class="smartClass.MainWindow"
+<Window x:Class="smartClass.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:smartClass"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
-        ui:TitleBar.Height="36"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        Title="SmartClass"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Height="70">
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <Button Name="SettingsBtn" Content="设置" Width="80" Margin="0,0,10,0"/>
-            <Button Name="ExitBtn" Content="退出" Width="80"/>
-        </StackPanel>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources RequestedTheme="{x:Null}"/>
+                <ui:XamlControlsResources/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
 
-        <ikw:SimpleStackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="5">
-            <TextBlock Text="智能教室系统" FontSize="24" FontWeight="Bold" TextAlignment="Center"/>
-            <TextBlock Text="Made with love by 雨夜漫步" FontSize="20" TextAlignment="Center"/>
+    <!-- 顶栏背景：自上而下从深色渐变到透明 -->
+    <Border CornerRadius="0">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#E6101018" Offset="0"/>
+                <GradientStop Color="#E6101018" Offset="0.55"/>
+                <GradientStop Color="#C8101018" Offset="0.75"/>
+                <GradientStop Color="#00101018" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
 
-        </ikw:SimpleStackPanel>
+        <Grid Margin="24,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
 
-        <StatusBar Grid.Row="2">
-            <TextBlock Name="StatusText" Text="就绪" Margin="6,0"/>
-        </StatusBar>
-    </Grid>
+            <!-- ========== 左栏 ========== -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+
+                <!-- 日期 + 星期 -->
+                <TextBlock Name="DateLabel" VerticalAlignment="Center"
+                           Foreground="#e0e0e8" FontSize="24" FontWeight="SemiBold"
+                           Text="6月26日 周五"/>
+
+                <!-- 分割线 -->
+                <Border Width="1" Height="40" Margin="20,0"
+                        Background="#1effffff"/>
+
+                <!-- 倒计时 -->
+                <TextBlock Name="CountdownLabel" VerticalAlignment="Center"
+                           Foreground="#f0a040" FontSize="18"
+                           Text="距期末 0 天"/>
+
+            </StackPanel>
+
+            <!-- ========== 中栏 ========== -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <TextBlock Name="ClockLabel"
+                           Foreground="#f0f0f8" FontSize="24" FontWeight="Light"
+                           FontFamily="Consolas" Cursor="Hand"
+                           ToolTip="点击进入全屏时钟"
+                           Text="00:00:00"/>
+            </StackPanel>
+
+            <!-- ========== 右栏 ========== -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal"
+                        HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                <!-- 课程信息 -->
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Name="NextCourseLabel"
+                               Foreground="#7ec8e3" FontSize="20" FontWeight="SemiBold"
+                               TextAlignment="Right"
+                               Text="下一节"/>
+                    <TextBlock Name="Next2CourseLabel"
+                               Foreground="#8888a0" FontSize="15"
+                               TextAlignment="Right"
+                               Text=""/>
+                </StackPanel>
+
+
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

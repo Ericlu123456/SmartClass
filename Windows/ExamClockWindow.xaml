@@ -1,0 +1,47 @@
+<Window x:Class="smartClass.Windows.ExamClockWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:smartClass.Windows"
+        Title="ExamClock"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#F0101018"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowState="Maximized"
+        Cursor="None">
+
+    <Grid>
+        <!-- 全屏点击退出提示 -->
+        <TextBlock Text="点击任意位置关闭" Foreground="#33ffffff" FontSize="14"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,40"/>
+
+        <!-- 居中时钟 -->
+        <StackPanel Name="ClockPanel" Orientation="Horizontal"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+
+            <!-- HH -->
+            <local:FlipDigit x:Name="DigH0"/>
+            <local:FlipDigit x:Name="DigH1"/>
+
+            <!-- 冒号分隔符 -->
+            <TextBlock Name="Colon1" Text=":" Width="40" TextAlignment="Center"
+                       Foreground="#666677" FontSize="150" FontWeight="Bold" FontFamily="Consolas"
+                       VerticalAlignment="Center" Margin="0,0,0,20"/>
+
+            <!-- mm -->
+            <local:FlipDigit x:Name="DigM0"/>
+            <local:FlipDigit x:Name="DigM1"/>
+
+            <!-- 冒号分隔符 -->
+            <TextBlock Name="Colon2" Text=":" Width="40" TextAlignment="Center"
+                       Foreground="#666677" FontSize="150" FontWeight="Bold" FontFamily="Consolas"
+                       VerticalAlignment="Center" Margin="0,0,0,20"/>
+
+            <!-- ss -->
+            <local:FlipDigit x:Name="DigS0"/>
+            <local:FlipDigit x:Name="DigS1"/>
+
+        </StackPanel>
+    </Grid>
+</Window>

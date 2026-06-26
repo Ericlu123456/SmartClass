@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using smartClass.Models;
 using smartClass.Services;
 
@@ -10,6 +12,16 @@ namespace smartClass.Windows
     public partial class ScheduleWindow : Window
     {
         private AppState _state;
+
+        // 窗口置底
+        private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOACTIVATE = 0x0010;
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
 
         public ScheduleWindow(AppState state)
         {
@@ -37,8 +49,11 @@ namespace smartClass.Windows
 
             // 拖拽移动
             this.MouseLeftButtonDown += ScheduleWindow_MouseLeftButtonDown;
-            // 拖拽结束后保存位置
+            // 拖拽后保存位置
             this.MouseLeftButtonUp += (s, e) => SavePosition();
+
+            // 窗口激活时推回 Z 轴底层
+            this.Activated += (s, e) => SendToBottom();
 
             try
             {
@@ -51,13 +66,14 @@ namespace smartClass.Windows
 
             this.UpdateLayout();
 
-            // 延迟定位：优先恢复上次位置，否则默认底部
+            // 延迟定位并置底
             this.Loaded += (s, e) =>
             {
                 try
                 {
                     if (!RestorePosition())
                         PositionWindowBottom();
+                    SendToBottom();
                 }
                 catch (Exception ex)
                 {
@@ -67,26 +83,40 @@ namespace smartClass.Windows
             };
         }
 
+        /// <summary>
+        /// 将窗口推至 Z 轴最底层（桌面图标上方）
+        /// </summary>
+        private void SendToBottom()
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd != IntPtr.Zero)
+                {
+                    SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 置底失败");
+            }
+        }
+
         #region 工具栏
 
         private void OpenSettings()
         {
-            // 在 UI 线程打开设置窗口
             var win = new SettingsWindow();
             win.Owner = this;
             win.ShowDialog();
-            // 设置关闭后重新加载数据
             _state = StorageService.Load();
             UpdateUI();
             this.UpdateLayout();
-            // 同步主窗口状态
             try
             {
                 var main = System.Windows.Application.Current?.MainWindow as MainWindow;
-                if (main != null)
-                {
-                    main.ReloadState();
-                }
+                main?.ReloadState();
             }
             catch (Exception ex)
             {
@@ -96,11 +126,8 @@ namespace smartClass.Windows
 
         #endregion
 
-        #region 窗口位置管理
+        #region 窗口定位
 
-        /// <summary>
-        /// 从 AppState 恢复上次保存的窗口位置
-        /// </summary>
         private bool RestorePosition()
         {
             try
@@ -108,7 +135,6 @@ namespace smartClass.Windows
                 if (_state.ScheduleWindowLeft >= 0 && _state.ScheduleWindowTop >= 0)
                 {
                     var screen = SystemParameters.WorkArea;
-                    // 验证保存的位置仍在当前屏幕范围内
                     if (_state.ScheduleWindowLeft >= screen.Left - 50 &&
                         _state.ScheduleWindowLeft < screen.Right - 50 &&
                         _state.ScheduleWindowTop >= screen.Top - 50 &&
@@ -127,9 +153,6 @@ namespace smartClass.Windows
             return false;
         }
 
-        /// <summary>
-        /// 保存当前窗口位置到 AppState
-        /// </summary>
         private void SavePosition()
         {
             try
@@ -151,22 +174,17 @@ namespace smartClass.Windows
         {
             var screen = SystemParameters.WorkArea;
 
-            Left = screen.Left + 20;
-
             UpdateLayout();
 
             double h = ActualHeight;
-            if (double.IsNaN(h) || h <= 0)
-                h = Height;
-            if (double.IsNaN(h) || h <= 0)
-                h = 200;
+            if (double.IsNaN(h) || h <= 0) h = Height;
+            if (double.IsNaN(h) || h <= 0) h = 200;
 
+            Left = screen.Left + 20;
             Top = screen.Bottom - h - 20;
 
             if (double.IsNaN(Top) || Top < screen.Top)
                 Top = screen.Top + 20;
-
-            Topmost = true;
         }
 
         #endregion
@@ -178,9 +196,7 @@ namespace smartClass.Windows
             try
             {
                 if (e.LeftButton == MouseButtonState.Pressed)
-                {
                     DragMove();
-                }
             }
             catch (Exception ex)
             {
@@ -195,7 +211,6 @@ namespace smartClass.Windows
         public void UpdateState(AppState state)
         {
             if (state == null) return;
-
             _state = state;
 
             try
@@ -212,51 +227,34 @@ namespace smartClass.Windows
 
         private void UpdateUI()
         {
-            var map = new[]
-            {
-                "周日", "周一", "周二", "周三", "周四", "周五", "周六"
-            };
-
+            var map = new[] { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
             var today = DateTime.Now.DayOfWeek;
             var todayText = map[(int)today];
 
-            // ItemsControl (不可选中，触摸屏无高亮残留)
             CoursesList.ItemsSource =
-                _state.Courses
-                    .Where(c => c.DayOfWeek == todayText)
-                    .ToList();
+                _state.Courses.Where(c => c.DayOfWeek == todayText).ToList();
 
-            var duty =
-                _state.DailyDuties
-                    .FirstOrDefault(d => d.Date.Date == DateTime.Today);
-
+            var duty = _state.DailyDuties.FirstOrDefault(d => d.Date.Date == DateTime.Today);
             if (duty == null)
             {
                 DutyList.ItemsSource = null;
             }
             else
             {
-                var group =
-                    _state.DutyGroups
-                        .FirstOrDefault(g => g.Id == duty.DutyGroupId);
-
+                var group = _state.DutyGroups.FirstOrDefault(g => g.Id == duty.DutyGroupId);
                 if (group == null)
                 {
                     DutyList.ItemsSource = null;
                 }
                 else
                 {
-                    var members =
-                        group.Members
-                            .Select(m => new
-                            {
-                                Name = _state.Students
-                                    .FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "",
-                                Role = m.Role ?? ""
-                            })
-                            .ToList();
-
-                    DutyList.ItemsSource = members;
+                    DutyList.ItemsSource = group.Members
+                        .Select(m => new
+                        {
+                            Name = _state.Students.FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "",
+                            Role = m.Role ?? ""
+                        })
+                        .ToList();
                 }
             }
 

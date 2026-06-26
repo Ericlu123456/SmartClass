@@ -72,6 +72,7 @@ namespace smartClass.Windows
             EnableShutdownChk.IsChecked = _state.EnableAutoShutdown;
             AutoShutdownTimeBox.Text = _state.AutoShutdownTime;
             EnableSpeechChk.IsChecked = _state.EnableSpeech;
+            SemesterEndPicker.SelectedDate = _state.SemesterEndDate;
 
             // 当字体框失去焦点时自动保存字体设置
             FontSizeBox.LostFocus += (s, e) => { FontSizeBox_LostFocus(s, e); };
@@ -88,6 +89,7 @@ namespace smartClass.Windows
             AutoShutdownTimeBox.KeyDown += (s, e) => { AutoShutdownTimeBox_KeyDown(s, e); };
             EnableSpeechChk.Checked += (s, e) => { EnableSpeechChk_Changed(s, e); };
             EnableSpeechChk.Unchecked += (s, e) => { EnableSpeechChk_Changed(s, e); };
+            SemesterEndPicker.SelectedDateChanged += (s, e) => { SemesterEndPicker_Changed(); };
 
             // 关于页面标题点击计数器（7次触发开发者选项）
             AboutTitle.MouseLeftButtonDown += (s, e) => { AboutTitle_Click(); };
@@ -754,6 +756,19 @@ namespace smartClass.Windows
             catch (Exception ex) { LogService.Log(ex, "语音播报设置变更失败"); }
         }
 
+        private void SemesterEndPicker_Changed()
+        {
+            try
+            {
+                if (SemesterEndPicker.SelectedDate.HasValue)
+                {
+                    _state.SemesterEndDate = SemesterEndPicker.SelectedDate.Value;
+                    AutoSave();
+                }
+            }
+            catch (Exception ex) { LogService.Log(ex, "学期结束日期设置失败"); }
+        }
+
         private void AutoShutdownTimeBox_LostFocus(object sender, RoutedEventArgs e)
         {
             try
@@ -879,7 +894,7 @@ namespace smartClass.Windows
             try
             {
                 var main = System.Windows.Application.Current?.MainWindow as MainWindow;
-                main?.UpdateScheduleWindow();
+                main?.ReloadState();
             }
             catch (Exception ex)
             {

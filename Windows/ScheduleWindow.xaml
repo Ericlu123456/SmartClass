@@ -7,7 +7,6 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        Topmost="True"
         ShowInTaskbar="False">
 
     <Window.Resources>

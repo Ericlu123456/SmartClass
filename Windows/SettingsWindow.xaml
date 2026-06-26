@@ -126,6 +126,11 @@
                                 <CheckBox Name="EnableSpeechChk" Content="启用上下课语音提醒" VerticalAlignment="Center"/>
                             </StackPanel>
 
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="学期结束:" Width="80" VerticalAlignment="Center"/>
+                                <DatePicker Name="SemesterEndPicker" Width="160" VerticalAlignment="Center"/>
+                            </StackPanel>
+
                         </StackPanel>
                     </Grid>
 

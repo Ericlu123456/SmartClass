@@ -28,10 +28,10 @@ namespace smartClass
 
             try
             {
-                // 创建但不显示主窗口，进入隐藏模式
                 var main = new MainWindow();
-                main.InitializeHiddenMode();
-                LogService.Log("应用启动成功，进入托盘隐藏模式");
+                main.InitializeTopBar();
+                main.Show();
+                LogService.Log("应用启动成功，顶栏模式");
             }
             catch (Exception ex)
             {
@@ -43,8 +43,6 @@ namespace smartClass
                     MessageBoxImage.Error);
                 Current.Shutdown();
             }
-
-            // 不调用 main.Show()
         }
 
         protected override void OnExit(ExitEventArgs e)

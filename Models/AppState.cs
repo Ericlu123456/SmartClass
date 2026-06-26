@@ -19,5 +19,7 @@ namespace smartClass.Models
         // 课程表窗口上次位置（-1 表示使用默认底部定位）
         public double ScheduleWindowLeft { get; set; } = -1;
         public double ScheduleWindowTop { get; set; } = -1;
+        // 学期结束日期（用于顶栏倒计时）
+        public DateTime SemesterEndDate { get; set; } = new DateTime(2026, 7, 15);
     }
 }
