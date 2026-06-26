@@ -14,5 +14,10 @@ namespace smartClass.Models
         // 常规设置：是否启用每天自动关机，以及时间（HH:mm）
         public bool EnableAutoShutdown { get; set; } = false;
         public string AutoShutdownTime { get; set; } = "23:00";
+        // 是否启用语音播报上下课提醒
+        public bool EnableSpeech { get; set; } = true;
+        // 课程表窗口上次位置（-1 表示使用默认底部定位）
+        public double ScheduleWindowLeft { get; set; } = -1;
+        public double ScheduleWindowTop { get; set; } = -1;
     }
 }

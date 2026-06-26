@@ -1,92 +1,145 @@
 <Window x:Class="smartClass.Windows.ScheduleWindow"
-     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-     Title="今日课程与值日"
-     SizeToContent="WidthAndHeight"
-     WindowStyle="None"
-     AllowsTransparency="True"
-     Background="Transparent"
-     Topmost="True"
-     ShowInTaskbar="False">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        Title="今日课程与值日"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources RequestedTheme="{x:Null}"/>
+                <ui:XamlControlsResources/>
+            </ResourceDictionary.MergedDictionaries>
 
-<Border x:Name="MainBorder"
-        Background="#DDFFFFFF"
-        BorderBrush="#404040"
-        BorderThickness="1"
-        CornerRadius="6"
-        Padding="8">
+            <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4"
+                                    Name="border">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background"
+                                            Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background"
+                                            Value="{DynamicResource SubtleFillColorTertiaryBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
 
-    <StackPanel Orientation="Horizontal">
+    <Border x:Name="MainBorder"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="6">
 
-        <StackPanel MinWidth="300">
-            <TextBlock Text="今日课程"
-                       FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal">
 
-                <ListBox Name="CoursesList"  MinWidth="200"
-                    BorderThickness="0"
-                    Background="Transparent">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Subject}"
-                                       Width="180"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+            <!-- 左侧工具栏 -->
+            <StackPanel Name="ToolbarPanel" Margin="0,0,6,0" VerticalAlignment="Top">
+                <Button Name="ToolSettingsBtn" Width="32" Height="32" Padding="0"
+                        ToolTip="打开设置" Cursor="Hand"
+                        Style="{StaticResource ToolbarButtonStyle}">
+                    <TextBlock Text="⚙" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+                <Button Name="ToolExitBtn" Width="32" Height="32" Padding="0" Margin="0,4,0,0"
+                        ToolTip="退出程序" Cursor="Hand"
+                        Style="{StaticResource ToolbarButtonStyle}">
+                    <TextBlock Text="⏻" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+            </StackPanel>
 
-                            <TextBlock Text="{Binding StartTime}"
-                                       Width="80"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+            <!-- 今日课程 -->
+            <StackPanel MinWidth="280">
+                <TextBlock Text="今日课程" FontWeight="Bold" Margin="0,0,0,4"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
-                            <TextBlock Text="-"
-                                       Width="10"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
+                <ItemsControl Name="CoursesList" MinWidth="200">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Subject}"
+                                           Width="160"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
 
-                            <TextBlock Text="{Binding EndTime}"
-                                       Width="80"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                <TextBlock Text="{Binding StartTime}"
+                                           Width="70"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+
+                                <TextBlock Text="-"
+                                           Width="10"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+
+                                <TextBlock Text="{Binding EndTime}"
+                                           Width="70"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- 分隔线 -->
+            <Border Width="1" Margin="8,0" VerticalAlignment="Stretch"
+                    Background="{DynamicResource CardStrokeColorDefaultBrush}"/>
+
+            <!-- 今日值日 -->
+            <StackPanel MinWidth="260" Margin="6,0,0,0">
+                <TextBlock Text="今日值日" FontWeight="Bold" Margin="0,0,0,4"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+
+                <ItemsControl Name="DutyList" MinWidth="180">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}"
+                                           Width="120"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+
+                                <TextBlock Text=" ("
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+
+                                <TextBlock Text="{Binding Role}"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+
+                                <TextBlock Text=")"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                           FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=FontSize}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
         </StackPanel>
-
-        <StackPanel MinWidth="300" Margin="10,0,0,0">
-            <TextBlock Text="今日值日"
-                       FontWeight="Bold"/>
-
-            <ListBox Name="DutyList"
-                     MinWidth="200"
-                     BorderThickness="0"
-                     Background="Transparent">
-
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}"
-                                       Width="140"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
-
-                            <TextBlock Text=" ("
-                                       Foreground="#666"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
-
-                            <TextBlock Text="{Binding Role}"
-                                       Foreground="#666"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
-
-                            <TextBlock Text=")"
-                                       Foreground="#666"
-                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=FontSize}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-
-            </ListBox>
-        </StackPanel>
-
-    </StackPanel>
-
-</Border>
-
-
+    </Border>
 </Window>

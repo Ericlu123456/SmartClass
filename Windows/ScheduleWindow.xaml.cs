@@ -2,194 +2,279 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
 using smartClass.Models;
+using smartClass.Services;
 
 namespace smartClass.Windows
 {
-public partial class ScheduleWindow : Window
-{
-private AppState _state;
-
-
-    public ScheduleWindow(AppState state)
+    public partial class ScheduleWindow : Window
     {
-        InitializeComponent();
+        private AppState _state;
 
-        _state = state;
-
-        ApplyTheme();
-
-        this.SizeToContent = SizeToContent.WidthAndHeight;
-
-        UpdateUI();
-
-        this.UpdateLayout();
-        PositionWindowBottom();
-
-        this.MouseLeftButtonDown += ScheduleWindow_MouseLeftButtonDown;
-    }
-
-    private bool IsDarkTheme()
-    {
-        try
+        public ScheduleWindow(AppState state)
         {
-            using var key = Registry.CurrentUser.OpenSubKey(
-                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            InitializeComponent();
 
-            return (int?)key?.GetValue("AppsUseLightTheme") == 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+            _state = state ?? new AppState();
 
-    /*
-     * v1.1
-     * 增加自动深浅模式支持
-     */
-    private void ApplyTheme()
-    {
-        if (IsDarkTheme())
-        {
-            MainBorder.Background =
-                new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(230, 25, 25, 25));
+            this.SizeToContent = SizeToContent.WidthAndHeight;
 
-            MainBorder.BorderBrush =
-                new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromRgb(70, 70, 70));
-
-            this.Foreground =
-                System.Windows.Media.Brushes.White;
-        }
-        else
-        {
-            MainBorder.Background =
-                new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(220, 255, 255, 255));
-
-            MainBorder.BorderBrush =
-                new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromRgb(210, 210, 210));
-
-            this.Foreground =
-                System.Windows.Media.Brushes.Black;
-        }
-    }
-
-    private void ScheduleWindow_MouseLeftButtonDown(object? sender, MouseButtonEventArgs e)
-    {
-        try
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            // 工具栏按钮事件
+            ToolSettingsBtn.Click += (s, e) =>
             {
-                DragMove();
+                try { OpenSettings(); }
+                catch (Exception ex) { LogService.Log(ex, "ScheduleWindow 工具栏-设置"); }
+            };
+            ToolExitBtn.Click += (s, e) =>
+            {
+                try
+                {
+                    LogService.Log("从课程表窗口退出程序");
+                    System.Windows.Application.Current.Shutdown();
+                }
+                catch (Exception ex) { LogService.Log(ex, "ScheduleWindow 工具栏-退出"); }
+            };
+
+            // 拖拽移动
+            this.MouseLeftButtonDown += ScheduleWindow_MouseLeftButtonDown;
+            // 拖拽结束后保存位置
+            this.MouseLeftButtonUp += (s, e) => SavePosition();
+
+            try
+            {
+                UpdateUI();
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 初始 UpdateUI 失败");
+            }
+
+            this.UpdateLayout();
+
+            // 延迟定位：优先恢复上次位置，否则默认底部
+            this.Loaded += (s, e) =>
+            {
+                try
+                {
+                    if (!RestorePosition())
+                        PositionWindowBottom();
+                }
+                catch (Exception ex)
+                {
+                    LogService.Log(ex, "ScheduleWindow 定位失败");
+                    PositionWindowBottom();
+                }
+            };
+        }
+
+        #region 工具栏
+
+        private void OpenSettings()
+        {
+            // 在 UI 线程打开设置窗口
+            var win = new SettingsWindow();
+            win.Owner = this;
+            win.ShowDialog();
+            // 设置关闭后重新加载数据
+            _state = StorageService.Load();
+            UpdateUI();
+            this.UpdateLayout();
+            // 同步主窗口状态
+            try
+            {
+                var main = System.Windows.Application.Current?.MainWindow as MainWindow;
+                if (main != null)
+                {
+                    main.ReloadState();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 同步主窗口状态失败");
             }
         }
-        catch
+
+        #endregion
+
+        #region 窗口位置管理
+
+        /// <summary>
+        /// 从 AppState 恢复上次保存的窗口位置
+        /// </summary>
+        private bool RestorePosition()
         {
+            try
+            {
+                if (_state.ScheduleWindowLeft >= 0 && _state.ScheduleWindowTop >= 0)
+                {
+                    var screen = SystemParameters.WorkArea;
+                    // 验证保存的位置仍在当前屏幕范围内
+                    if (_state.ScheduleWindowLeft >= screen.Left - 50 &&
+                        _state.ScheduleWindowLeft < screen.Right - 50 &&
+                        _state.ScheduleWindowTop >= screen.Top - 50 &&
+                        _state.ScheduleWindowTop < screen.Bottom - 50)
+                    {
+                        Left = _state.ScheduleWindowLeft;
+                        Top = _state.ScheduleWindowTop;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 恢复位置失败");
+            }
+            return false;
         }
-    }
 
-    private void PositionWindowBottom()
-    {
-        var screen = SystemParameters.WorkArea;
-
-        Left = screen.Left + 20;
-
-        UpdateLayout();
-
-        double h = ActualHeight;
-
-        if (double.IsNaN(h) || h <= 0)
-            h = Height;
-
-        Top = screen.Bottom - h - 20;
-
-        Topmost = false;
-    }
-
-    public void UpdateState(AppState state)
-    {
-        _state = state;
-
-        UpdateUI();
-
-        UpdateLayout();
-
-        PositionWindowBottom();
-    }
-
-    private void UpdateUI()
-    {
-        var map = new[]
+        /// <summary>
+        /// 保存当前窗口位置到 AppState
+        /// </summary>
+        private void SavePosition()
         {
-            "周日",
-            "周一",
-            "周二",
-            "周三",
-            "周四",
-            "周五",
-            "周六"
-        };
-
-        var today = DateTime.Now.DayOfWeek;
-        var todayText = map[(int)today];
-
-        CoursesList.ItemsSource =
-            _state.Courses
-                .Where(c => c.DayOfWeek == todayText)
-                .ToList();
-
-        var duty =
-            _state.DailyDuties
-                .FirstOrDefault(d => d.Date.Date == DateTime.Today);
-
-        if (duty == null)
-        {
-            DutyList.ItemsSource = null;
+            try
+            {
+                if (!double.IsNaN(Left) && !double.IsNaN(Top))
+                {
+                    _state.ScheduleWindowLeft = Left;
+                    _state.ScheduleWindowTop = Top;
+                    StorageService.Save(_state);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 保存位置失败");
+            }
         }
-        else
-        {
-            var group =
-                _state.DutyGroups
-                    .FirstOrDefault(g => g.Id == duty.DutyGroupId);
 
-            if (group == null)
+        private void PositionWindowBottom()
+        {
+            var screen = SystemParameters.WorkArea;
+
+            Left = screen.Left + 20;
+
+            UpdateLayout();
+
+            double h = ActualHeight;
+            if (double.IsNaN(h) || h <= 0)
+                h = Height;
+            if (double.IsNaN(h) || h <= 0)
+                h = 200;
+
+            Top = screen.Bottom - h - 20;
+
+            if (double.IsNaN(Top) || Top < screen.Top)
+                Top = screen.Top + 20;
+
+            Topmost = true;
+        }
+
+        #endregion
+
+        #region 拖拽
+
+        private void ScheduleWindow_MouseLeftButtonDown(object? sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    DragMove();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 拖拽失败");
+            }
+        }
+
+        #endregion
+
+        #region UI 更新
+
+        public void UpdateState(AppState state)
+        {
+            if (state == null) return;
+
+            _state = state;
+
+            try
+            {
+                UpdateUI();
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow UpdateUI 失败");
+            }
+
+            UpdateLayout();
+        }
+
+        private void UpdateUI()
+        {
+            var map = new[]
+            {
+                "周日", "周一", "周二", "周三", "周四", "周五", "周六"
+            };
+
+            var today = DateTime.Now.DayOfWeek;
+            var todayText = map[(int)today];
+
+            // ItemsControl (不可选中，触摸屏无高亮残留)
+            CoursesList.ItemsSource =
+                _state.Courses
+                    .Where(c => c.DayOfWeek == todayText)
+                    .ToList();
+
+            var duty =
+                _state.DailyDuties
+                    .FirstOrDefault(d => d.Date.Date == DateTime.Today);
+
+            if (duty == null)
             {
                 DutyList.ItemsSource = null;
             }
             else
             {
-                var members =
-                    group.Members
-                        .Select(m => new
-                        {
-                            Name = _state.Students
-                                .FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "",
+                var group =
+                    _state.DutyGroups
+                        .FirstOrDefault(g => g.Id == duty.DutyGroupId);
 
-                            Role = m.Role ?? ""
-                        })
-                        .ToList();
+                if (group == null)
+                {
+                    DutyList.ItemsSource = null;
+                }
+                else
+                {
+                    var members =
+                        group.Members
+                            .Select(m => new
+                            {
+                                Name = _state.Students
+                                    .FirstOrDefault(s => s.Id == m.StudentId)?.Name ?? "",
+                                Role = m.Role ?? ""
+                            })
+                            .ToList();
 
-                DutyList.ItemsSource = members;
+                    DutyList.ItemsSource = members;
+                }
+            }
+
+            try
+            {
+                var fs = _state.FontSize;
+                if (!double.IsNaN(fs) && !double.IsInfinity(fs) && fs > 0)
+                {
+                    CoursesList.FontSize = fs;
+                    DutyList.FontSize = fs;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "ScheduleWindow 字体大小设置失败");
             }
         }
 
-        try
-        {
-            var fs = _state.FontSize;
-
-            CoursesList.FontSize = fs;
-            DutyList.FontSize = fs;
-        }
-        catch
-        {
-        }
+        #endregion
     }
-}
-
-
 }
