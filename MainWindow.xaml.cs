@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using System.Windows.Forms;
 using smartClass.Models;
@@ -638,6 +639,10 @@ namespace smartClass
                 if (_state.Students == null || !_state.Students.Any())
                     _state = StorageService.Load();
                 RefreshUI();
+
+                // 时钟弹入动画（弹性缩放 + 淡入）
+                var clockAnim = (Storyboard)FindResource("ClockEntranceAnimation");
+                clockAnim.Begin();
             }
             catch (Exception ex)
             {

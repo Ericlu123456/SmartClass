@@ -25,18 +25,18 @@
             <local:FlipDigit x:Name="DigH1"/>
 
             <!-- 冒号分隔符 -->
-            <TextBlock Name="Colon1" Text=":" Width="40" TextAlignment="Center"
+            <TextBlock Name="Colon1" Text=":" Width="60" TextAlignment="Center"
                        Foreground="#666677" FontSize="150" FontWeight="Bold" FontFamily="Consolas"
-                       VerticalAlignment="Center" Margin="0,0,0,20"/>
+                       VerticalAlignment="Center" Margin="0,0,20,20"/>
 
             <!-- mm -->
             <local:FlipDigit x:Name="DigM0"/>
             <local:FlipDigit x:Name="DigM1"/>
 
             <!-- 冒号分隔符 -->
-            <TextBlock Name="Colon2" Text=":" Width="40" TextAlignment="Center"
+            <TextBlock Name="Colon2" Text=":" Width="60" TextAlignment="Center"
                        Foreground="#666677" FontSize="150" FontWeight="Bold" FontFamily="Consolas"
-                       VerticalAlignment="Center" Margin="0,0,0,20"/>
+                       VerticalAlignment="Center" Margin="0,0,20,20"/>
 
             <!-- ss -->
             <local:FlipDigit x:Name="DigS0"/>

@@ -16,20 +16,47 @@
                 <ui:ThemeResources RequestedTheme="{x:Null}"/>
                 <ui:XamlControlsResources/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- 时钟入场动画：弹性缩放 + 淡入 -->
+            <Storyboard x:Key="ClockEntranceAnimation">
+                <DoubleAnimation Storyboard.TargetName="ClockScaleTransform"
+                                 Storyboard.TargetProperty="ScaleX"
+                                 From="0.7" To="1.0"
+                                 Duration="0:0:0.7">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation Storyboard.TargetName="ClockScaleTransform"
+                                 Storyboard.TargetProperty="ScaleY"
+                                 From="0.7" To="1.0"
+                                 Duration="0:0:0.7">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation Storyboard.TargetName="ClockLabel"
+                                 Storyboard.TargetProperty="Opacity"
+                                 From="0" To="1"
+                                 Duration="0:0:0.35"/>
+            </Storyboard>
         </ResourceDictionary>
     </Window.Resources>
 
-    <!-- 顶栏背景：自上而下从深色渐变到透明 -->
-    <Border CornerRadius="0">
-        <Border.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#E6101018" Offset="0"/>
-                <GradientStop Color="#E6101018" Offset="0.55"/>
-                <GradientStop Color="#C8101018" Offset="0.75"/>
-                <GradientStop Color="#00101018" Offset="1"/>
-            </LinearGradientBrush>
-        </Border.Background>
+    <Grid>
+        <!-- 背景层：高斯模糊 + 主题色半透明 -->
+        <Border Name="BackgroundBorder">
+            <Border.Effect>
+                <BlurEffect Radius="12" KernelType="Gaussian"/>
+            </Border.Effect>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#00101018" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
 
+        <!-- 内容层 -->
         <Grid Margin="24,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -40,28 +67,38 @@
             <!-- ========== 左栏 ========== -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 
-                <!-- 日期 + 星期 -->
+                <!-- 日期 + 星期（暗色模式→白 / 浅色模式→黑） -->
                 <TextBlock Name="DateLabel" VerticalAlignment="Center"
-                           Foreground="#e0e0e8" FontSize="24" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                           FontSize="24" FontWeight="SemiBold"
                            Text="6月26日 周五"/>
 
                 <!-- 分割线 -->
-                <Border Width="1" Height="40" Margin="20,0"
-                        Background="#1effffff"/>
+                <Border Name="SeparatorLine"
+                        Width="1" Height="40" Margin="20,0"
+                        Background="{DynamicResource CardStrokeColorDefaultBrush}"
+                        Opacity="0.4"/>
 
-                <!-- 倒计时 -->
+                <!-- 倒计时（主题强调色） -->
                 <TextBlock Name="CountdownLabel" VerticalAlignment="Center"
-                           Foreground="#f0a040" FontSize="18"
+                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                           FontSize="18"
                            Text="距期末 0 天"/>
 
             </StackPanel>
 
-            <!-- ========== 中栏 ========== -->
+            <!-- ========== 中栏 — 时钟（带入场动画） ========== -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
+                        HorizontalAlignment="Center"
+                        RenderTransformOrigin="0.5,0.5">
+                <StackPanel.RenderTransform>
+                    <ScaleTransform x:Name="ClockScaleTransform" ScaleX="0.7" ScaleY="0.7"/>
+                </StackPanel.RenderTransform>
                 <TextBlock Name="ClockLabel"
-                           Foreground="#f0f0f8" FontSize="24" FontWeight="Light"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                           FontSize="24" FontWeight="Light"
                            FontFamily="Consolas" Cursor="Hand"
+                           Opacity="0"
                            ToolTip="点击进入全屏时钟"
                            Text="00:00:00"/>
             </StackPanel>
@@ -73,17 +110,18 @@
                 <!-- 课程信息 -->
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Name="NextCourseLabel"
-                               Foreground="#7ec8e3" FontSize="20" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               FontSize="20" FontWeight="SemiBold"
                                TextAlignment="Right"
                                Text="下一节"/>
                     <TextBlock Name="Next2CourseLabel"
-                               Foreground="#8888a0" FontSize="15"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               FontSize="15"
                                TextAlignment="Right"
                                Text=""/>
                 </StackPanel>
 
-
             </StackPanel>
         </Grid>
-    </Border>
+    </Grid>
 </Window>
