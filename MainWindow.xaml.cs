@@ -40,7 +40,7 @@ namespace smartClass
             };
 
             // 点击时钟 → 全屏数字时钟
-            ClockLabel.MouseLeftButtonDown += (s, e) =>
+            ClockPanel.MouseLeftButtonDown += (s, e) =>
             {
                 try { ShowExamClock(); }
                 catch (Exception ex) { LogService.Log(ex, "全屏时钟打开失败"); }
@@ -100,6 +100,13 @@ namespace smartClass
             {
                 try { ShowScheduleWindow(); }
                 catch (Exception ex) { LogService.Log(ex, "课程表窗口创建失败"); }
+            }), DispatcherPriority.ApplicationIdle);
+
+            // 延迟重新打开未关闭的通知窗口
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try { ReopenNotifications(); }
+                catch (Exception ex) { LogService.Log(ex, "重新打开通知窗口失败"); }
             }), DispatcherPriority.ApplicationIdle);
 
             // 首次刷新 UI
@@ -344,6 +351,30 @@ namespace smartClass
                 LogService.Log(ex, "更新课程表窗口失败");
                 _scheduleWindow = null;
                 ShowScheduleWindow();
+            }
+        }
+
+        #endregion
+
+        #region 通知窗口
+
+        private void ReopenNotifications()
+        {
+            try
+            {
+                if (_state.Notifications == null || _state.Notifications.Count == 0)
+                    return;
+
+                foreach (var notification in _state.Notifications)
+                {
+                    var win = new NotificationWindow(notification, _state.FontSize);
+                    win.Show();
+                }
+                LogService.Log($"已重新打开 {_state.Notifications.Count} 个通知窗口");
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex, "重新打开通知窗口失败");
             }
         }
 

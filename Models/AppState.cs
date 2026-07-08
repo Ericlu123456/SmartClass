@@ -9,6 +9,7 @@ namespace smartClass.Models
         public List<Course> Courses { get; set; } = new List<Course>();
         public List<DutyGroup> DutyGroups { get; set; } = new List<DutyGroup>();
         public List<DailyDuty> DailyDuties { get; set; } = new List<DailyDuty>();
+        public List<Notification> Notifications { get; set; } = new List<Notification>();
         // UI preferences
         public double FontSize { get; set; } = 14.0;
         // 常规设置：是否启用每天自动关机，以及时间（HH:mm）

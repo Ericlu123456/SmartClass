@@ -156,6 +156,7 @@ namespace smartClass.Services
                 state.Courses ??= new System.Collections.Generic.List<Course>();
                 state.DutyGroups ??= new System.Collections.Generic.List<DutyGroup>();
                 state.DailyDuties ??= new System.Collections.Generic.List<DailyDuty>();
+                state.Notifications ??= new System.Collections.Generic.List<Notification>();
 
                 // 修复无效的 FontSize
                 if (double.IsNaN(state.FontSize) || double.IsInfinity(state.FontSize) || state.FontSize < 1)

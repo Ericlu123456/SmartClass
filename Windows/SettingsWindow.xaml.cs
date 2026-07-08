@@ -282,6 +282,7 @@ namespace smartClass.Windows
                         state.Courses ??= new List<Course>();
                         state.DutyGroups ??= new List<DutyGroup>();
                         state.DailyDuties ??= new List<DailyDuty>();
+                        state.Notifications ??= new List<Notification>();
 
                         _state = state;
                         RefreshLists();

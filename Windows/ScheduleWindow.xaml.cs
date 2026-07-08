@@ -37,6 +37,11 @@ namespace smartClass.Windows
                 try { OpenSettings(); }
                 catch (Exception ex) { LogService.Log(ex, "ScheduleWindow 工具栏-设置"); }
             };
+            ToolAddNotificationBtn.Click += (s, e) =>
+            {
+                try { OpenAddNotification(); }
+                catch (Exception ex) { LogService.Log(ex, "ScheduleWindow 工具栏-添加提醒"); }
+            };
             ToolExitBtn.Click += (s, e) =>
             {
                 try
@@ -121,6 +126,27 @@ namespace smartClass.Windows
             catch (Exception ex)
             {
                 LogService.Log(ex, "ScheduleWindow 同步主窗口状态失败");
+            }
+        }
+
+        private void OpenAddNotification()
+        {
+            var dlg = new NotificationInputDialog();
+            dlg.Owner = this;
+            var result = dlg.ShowDialog();
+            if (result == true && !string.IsNullOrWhiteSpace(dlg.NotificationContent))
+            {
+                var notification = new Notification
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Content = dlg.NotificationContent,
+                    CreatedAt = DateTime.Now
+                };
+                _state.Notifications.Add(notification);
+                StorageService.Save(_state);
+
+                var win = new NotificationWindow(notification, _state.FontSize);
+                win.Show();
             }
         }
 

@@ -88,7 +88,7 @@
             </StackPanel>
 
             <!-- ========== 中栏 — 时钟（带入场动画） ========== -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center"
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Name="ClockPanel"
                         HorizontalAlignment="Center"
                         RenderTransformOrigin="0.5,0.5">
                 <StackPanel.RenderTransform>

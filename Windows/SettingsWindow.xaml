@@ -466,7 +466,7 @@
                             <!-- 点击标题7次触发开发者选项 -->
                             <TextBlock Name="AboutTitle" Text="智能教室系统" FontSize="28" FontWeight="Bold" TextAlignment="Center" Margin="0,0,0,10" Cursor="Hand"/>
                             <TextBlock Text="Made with love by 雨夜漫步" FontSize="20" TextAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,20"/>
-                            <TextBlock Text="版本 1.1" FontSize="14" TextAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                            <TextBlock Text="版本 1.4" FontSize="14" TextAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
                             <TextBlock Text="" FontSize="12" TextAlignment="Center" Margin="0,20,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" MaxWidth="400">
                                 <Run Text="你的老师是不是经常拖堂？"/>
                                 <LineBreak/>

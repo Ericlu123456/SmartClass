@@ -63,6 +63,11 @@
                         Style="{StaticResource ToolbarButtonStyle}">
                     <TextBlock Text="⚙" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
+                <Button Name="ToolAddNotificationBtn" Width="32" Height="32" Padding="0" Margin="0,4,0,0"
+                        ToolTip="添加提醒" Cursor="Hand"
+                        Style="{StaticResource ToolbarButtonStyle}">
+                    <TextBlock Text="+" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
                 <Button Name="ToolExitBtn" Width="32" Height="32" Padding="0" Margin="0,4,0,0"
                         ToolTip="退出程序" Cursor="Hand"
                         Style="{StaticResource ToolbarButtonStyle}">
